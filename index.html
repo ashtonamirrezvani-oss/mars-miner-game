@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mars Miner v2.3</title>
+    <title>Mars Miner v2.4</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background: #0a0a1f; font-family: 'Press Start 2P', system-ui; overflow: hidden; touch-action: none; }
@@ -40,7 +40,7 @@
             <div onclick="toggleStore()" class="menu-btn">🛒</div>
         </div>
 
-        <div class="version-label">v2.3</div>
+        <div class="version-label">v2.4</div>
 
         <canvas id="game-canvas" width="800" height="520"></canvas>
 
@@ -98,7 +98,7 @@
 
     <script>
         let canvas, ctx;
-        let player = { x: 400, y: 82, vx: 0, vy: 0, width: 20, height: 26 };
+        let player = { x: 400, y: 82, vx: 0, vy: 0, width: 18, height: 24 };
         let cameraY = 0;
         let o2 = 100;
         let maxO2 = 100;
@@ -140,7 +140,7 @@
                 if (!gameOver && !won && buildings.some(b => b.type === 'rig')) { resources.regolith += 4; updateHUD(); }
             }, 2800);
 
-            setTimeout(() => showTip("v2.3 - You now start on solid ground! Use joystick + tap to mine."), 1800);
+            setTimeout(() => showTip("v2.4 - Fixed walking through walls! Tap to mine feels better now."), 1800);
             setTimeout(showNextTip, 6500);
         }
 
@@ -162,13 +162,12 @@
                 }
             }
 
-            // VERY BIG solid starting platform (v2.3)
+            // Big solid starting platform (v2.4)
             for (let x = 10; x < 32; x++) {
                 for (let y = 5; y < 15; y++) {
                     if (terrain[x]) terrain[x][y] = 'surface';
                 }
             }
-            // Extra thick layer
             for (let x = 10; x < 32; x++) {
                 if (terrain[x]) terrain[x][15] = 'surface';
             }
@@ -231,41 +230,59 @@
             if (terrain[col][row] === 'air' || terrain[col][row] === 'surface') return;
 
             terrain[col][row] = 'air';
-            let amt = 5 + Math.floor(Math.random()*6);
+            let amt = 6 + Math.floor(Math.random()*5);
             let typ = 'regolith';
 
             let found = false;
             for (let p of pockets) {
                 if (!p.mined && Math.hypot(p.x - wx, p.y - wy) < p.size + 15) {
-                    typ = p.type; amt = 22 + Math.floor(Math.random()*13);
-                    p.mined = true; createParticles(p.x, p.y, 26, '#f4a261');
+                    typ = p.type; amt = 24 + Math.floor(Math.random()*12);
+                    p.mined = true; createParticles(p.x, p.y, 28, '#f4a261');
                     showTip("Great find! Rich pocket mined!"); found = true; break;
                 }
             }
             if (!found) { if (Math.random()<0.22) typ='ice'; else if (Math.random()<0.09) typ='iron'; }
 
             resources[typ] = (resources[typ]||0) + amt;
-            createParticles(wx, wy, 10, '#c1440e');
+            createParticles(wx, wy, 12, '#c1440e');
             updateHUD();
         }
 
         function createParticles(x, y, c, col) {
-            for (let i=0; i<c; i++) particles.push({x, y, vx:(Math.random()-0.5)*3.1, vy:(Math.random()-0.65)*2.5, life:19+Math.random()*11, color:col});
+            for (let i=0; i<c; i++) particles.push({x, y, vx:(Math.random()-0.5)*3.2, vy:(Math.random()-0.65)*2.5, life:20+Math.random()*12, color:col});
         }
 
         function updatePlayer() {
             if (gameOver || won) return;
 
             let mx = 0;
-            if (joystickActive) mx = joystickX * 2.85;
-            if (keys['ArrowLeft']||keys['a']) mx -= 2.5;
-            if (keys['ArrowRight']||keys['d']) mx += 2.5;
+            if (joystickActive) mx = joystickX * 2.8;
+            if (keys['ArrowLeft']||keys['a']) mx -= 2.4;
+            if (keys['ArrowRight']||keys['d']) mx += 2.4;
 
-            player.x += mx;
+            // Horizontal collision (left + right walls)
+            const nextX = player.x + mx;
+            const leftCol = Math.floor((nextX - 9) / 20);
+            const rightCol = Math.floor((nextX + 9) / 20);
+            const checkRow = Math.floor((player.y + 6) / 18);
+
+            let canMove = true;
+            if (leftCol >= 0 && leftCol < terrain.length && checkRow >= 0 && checkRow < terrain[0].length) {
+                if (terrain[leftCol][checkRow] !== 'air' && terrain[leftCol][checkRow] !== 'surface') canMove = false;
+            }
+            if (rightCol >= 0 && rightCol < terrain.length && checkRow >= 0 && checkRow < terrain[0].length) {
+                if (terrain[rightCol][checkRow] !== 'air' && terrain[rightCol][checkRow] !== 'surface') canMove = false;
+            }
+
+            if (canMove) {
+                player.x = nextX;
+            }
+
             player.x = Math.max(35, Math.min(player.x, canvas.width-55));
 
+            // Vertical collision (feet)
             const col = Math.floor(player.x / 20);
-            const row = Math.floor((player.y + 8) / 18);
+            const row = Math.floor((player.y + 10) / 18);
 
             if (col >= 0 && col < terrain.length && row >= 0 && row < terrain[0].length) {
                 const block = terrain[col][row];
@@ -274,7 +291,7 @@
                     player.y += player.vy;
                 } else {
                     player.vy = 0;
-                    player.y = row * 18 - 8; // snap to ground
+                    player.y = row * 18 - 10;
                 }
             }
 
