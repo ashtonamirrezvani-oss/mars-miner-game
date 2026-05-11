@@ -3,130 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mars Miner v2 - Escape to Earth</title>
+    <title>Mars Miner v2.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap');
         
-        body {
-            background: #0a0a1f;
-            font-family: 'Press Start 2P', system-ui;
-            overflow: hidden;
-            touch-action: none;
-        }
+        body { background: #0a0a1f; font-family: 'Press Start 2P', system-ui; overflow: hidden; touch-action: none; }
         
-        #game-container {
-            position: relative;
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
+        #game-container { position: relative; width: 100vw; height: 100vh; }
         
-        canvas {
-            image-rendering: crisp-edges;
-            touch-action: none;
-            border: none;
-            background: #1a0f2e;
-        }
+        canvas { image-rendering: crisp-edges; touch-action: none; border: none; background: #1a0f2e; }
         
         .top-bar {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 52px;
-            background: rgba(10, 10, 31, 0.95);
-            border-bottom: 3px solid #f4a261;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 12px;
-            z-index: 100;
+            position: absolute; top: 0; left: 0; right: 0; height: 52px;
+            background: rgba(10, 10, 31, 0.95); border-bottom: 3px solid #f4a261;
+            display: flex; align-items: center; justify-content: space-between; padding: 0 12px; z-index: 100;
         }
         
-        .resource-pill {
-            background: #1f140f;
-            border: 2px solid #c1440e;
-            padding: 4px 10px;
-            border-radius: 9999px;
-            font-size: 11px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
+        .resource-pill { background: #1f140f; border: 2px solid #c1440e; padding: 4px 10px; border-radius: 9999px; font-size: 11px; display: flex; align-items: center; gap: 6px; }
         
-        .menu-btn {
-            width: 44px;
-            height: 44px;
-            background: #c1440e;
-            border: 3px solid #f4a261;
-            border-radius: 9999px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            box-shadow: 0 0 10px #f4a261;
-        }
+        .menu-btn { width: 44px; height: 44px; background: #c1440e; border: 3px solid #f4a261; border-radius: 9999px; display: flex; align-items: center; justify-content: center; font-size: 22px; box-shadow: 0 0 10px #f4a261; }
         
         .joystick {
-            position: absolute;
-            bottom: 30px;
-            left: 30px;
-            width: 110px;
-            height: 110px;
-            background: rgba(241, 162, 97, 0.15);
-            border: 3px solid #f4a261;
-            border-radius: 9999px;
-            touch-action: none;
-            z-index: 50;
+            position: absolute; bottom: 75px; left: 28px;
+            width: 85px; height: 85px;
+            background: rgba(241, 162, 97, 0.18); border: 3px solid #f4a261; border-radius: 9999px; touch-action: none; z-index: 50;
         }
         
         .joystick-knob {
-            position: absolute;
-            width: 48px;
-            height: 48px;
-            background: #f4a261;
-            border: 3px solid #c1440e;
-            border-radius: 9999px;
-            left: 31px;
-            top: 31px;
-            box-shadow: 0 0 15px #f4a261;
+            position: absolute; width: 38px; height: 38px;
+            background: #f4a261; border: 3px solid #c1440e; border-radius: 9999px;
+            left: 23.5px; top: 23.5px; box-shadow: 0 0 12px #f4a261;
         }
         
         .tip-box {
-            position: absolute;
-            bottom: 160px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(26, 18, 11, 0.95);
-            border: 2px solid #f4a261;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-size: 10px;
-            max-width: 280px;
-            text-align: center;
-            z-index: 40;
+            position: absolute; bottom: 170px; left: 50%; transform: translateX(-50%);
+            background: rgba(26, 18, 11, 0.95); border: 2px solid #f4a261;
+            padding: 8px 16px; border-radius: 8px; font-size: 10px; max-width: 280px; text-align: center; z-index: 40;
         }
         
-        .store-modal {
-            position: absolute;
-            top: 60px;
-            right: 12px;
-            width: 280px;
-            background: #1a120b;
-            border: 4px solid #f4a261;
-            border-radius: 12px;
-            z-index: 200;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-        }
+        .store-modal { position: absolute; top: 60px; right: 12px; width: 280px; background: #1a120b; border: 4px solid #f4a261; border-radius: 12px; z-index: 200; box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
     </style>
 </head>
 <body>
     <div id="game-container">
         <!-- Top HUD -->
         <div class="top-bar">
-            <!-- Left: O2 + Resources -->
             <div class="flex items-center gap-3">
                 <!-- O2 -->
                 <div class="flex items-center gap-2 bg-[#1f140f] border-2 border-[#c1440e] px-3 py-1 rounded-2xl">
@@ -137,43 +59,29 @@
                     <div id="o2-text" class="text-[#00ff9d] text-xs font-bold w-8 text-right">100</div>
                 </div>
 
-                <!-- Resources -->
                 <div class="flex gap-1.5 text-xs">
-                    <div class="resource-pill">
-                        <span>🪨</span> <span id="regolith">245</span>
-                    </div>
-                    <div class="resource-pill">
-                        <span>❄️</span> <span id="ice">87</span>
-                    </div>
-                    <div class="resource-pill">
-                        <span>⛓️</span> <span id="iron">64</span>
-                    </div>
-                    <div class="resource-pill">
-                        <span>☢️</span> <span id="helium">12</span>
-                    </div>
+                    <div class="resource-pill"><span>🪨</span> <span id="regolith">245</span></div>
+                    <div class="resource-pill"><span>❄️</span> <span id="ice">87</span></div>
+                    <div class="resource-pill"><span>⛓️</span> <span id="iron">64</span></div>
+                    <div class="resource-pill"><span>☢️</span> <span id="helium">12</span></div>
                 </div>
             </div>
 
-            <!-- Right: Menu -->
-            <div onclick="toggleStore()" class="menu-btn">
-                🛒
-            </div>
+            <div onclick="toggleStore()" class="menu-btn">🛒</div>
         </div>
 
-        <!-- Game Canvas -->
         <canvas id="game-canvas" width="800" height="520"></canvas>
 
-        <!-- Virtual Joystick -->
+        <!-- Smaller, higher joystick -->
         <div id="joystick" class="joystick">
             <div id="knob" class="joystick-knob"></div>
         </div>
 
-        <!-- Tip Box -->
         <div id="tip-box" class="tip-box hidden">
             <div id="tip-text" class="text-[#f4a261] text-xs"></div>
         </div>
 
-        <!-- Store Modal -->
+        <!-- Store -->
         <div id="store-modal" class="store-modal hidden">
             <div class="p-4">
                 <div class="flex justify-between items-center mb-3">
@@ -182,94 +90,62 @@
                 </div>
                 
                 <div class="space-y-2 text-sm">
-                    <!-- Store Items -->
                     <div onclick="buyItem('o2pump')" class="flex items-center justify-between bg-[#2a180f] hover:bg-[#3a2518] p-3 rounded-xl cursor-pointer">
                         <div class="flex items-center gap-3">
                             <div class="text-3xl">🔌</div>
-                            <div>
-                                <div class="font-bold">O₂ Pump</div>
-                                <div class="text-[10px] text-[#f4a261]/70">Refills oxygen • Place on map</div>
-                            </div>
+                            <div><div class="font-bold">O₂ Pump Station</div><div class="text-[10px] text-[#f4a261]/70">Place it • Stand near it with Ice to refill O₂</div></div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-[#f4a261]">120 <span class="text-xs">⛓️</span></div>
-                        </div>
+                        <div class="text-right"><div class="text-[#f4a261]">120 <span class="text-xs">⛓️</span></div></div>
                     </div>
 
                     <div onclick="buyItem('laser')" class="flex items-center justify-between bg-[#2a180f] hover:bg-[#3a2518] p-3 rounded-xl cursor-pointer">
                         <div class="flex items-center gap-3">
                             <div class="text-3xl">🔥</div>
-                            <div>
-                                <div class="font-bold">Advanced Laser</div>
-                                <div class="text-[10px] text-[#f4a261]/70">Mine faster + deeper</div>
-                            </div>
+                            <div><div class="font-bold">Advanced Laser</div><div class="text-[10px] text-[#f4a261]/70">Mine faster</div></div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-[#f4a261]">85 <span class="text-xs">🪨</span></div>
-                        </div>
+                        <div class="text-right"><div class="text-[#f4a261]">85 <span class="text-xs">🪨</span></div></div>
                     </div>
 
                     <div onclick="buyItem('habitat')" class="flex items-center justify-between bg-[#2a180f] hover:bg-[#3a2518] p-3 rounded-xl cursor-pointer">
                         <div class="flex items-center gap-3">
                             <div class="text-3xl">🏠</div>
-                            <div>
-                                <div class="font-bold">Habitat Module</div>
-                                <div class="text-[10px] text-[#f4a261]/70">+ O₂ capacity + survival</div>
-                            </div>
+                            <div><div class="font-bold">Habitat Module</div><div class="text-[10px] text-[#f4a261]/70">+ O₂ capacity</div></div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-[#f4a261]">150 <span class="text-xs">❄️</span></div>
-                        </div>
+                        <div class="text-right"><div class="text-[#f4a261]">150 <span class="text-xs">❄️</span></div></div>
                     </div>
 
                     <div onclick="buyItem('rig')" class="flex items-center justify-between bg-[#2a180f] hover:bg-[#3a2518] p-3 rounded-xl cursor-pointer">
                         <div class="flex items-center gap-3">
                             <div class="text-3xl">⛏️</div>
-                            <div>
-                                <div class="font-bold">Auto Mining Rig</div>
-                                <div class="text-[10px] text-[#f4a261]/70">Passive resources</div>
-                            </div>
+                            <div><div class="font-bold">Auto Mining Rig</div><div class="text-[10px] text-[#f4a261]/70">Passive resources</div></div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-[#f4a261]">200 <span class="text-xs">🪨</span></div>
-                        </div>
+                        <div class="text-right"><div class="text-[#f4a261]">200 <span class="text-xs">🪨</span></div></div>
                     </div>
 
                     <div onclick="buyItem('solar')" class="flex items-center justify-between bg-[#2a180f] hover:bg-[#3a2518] p-3 rounded-xl cursor-pointer">
                         <div class="flex items-center gap-3">
                             <div class="text-3xl">☀️</div>
-                            <div>
-                                <div class="font-bold">Solar Array</div>
-                                <div class="text-[10px] text-[#f4a261]/70">Powers equipment</div>
-                            </div>
+                            <div><div class="font-bold">Solar Array</div><div class="text-[10px] text-[#f4a261]/70">Powers base</div></div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-[#f4a261]">95 <span class="text-xs">🪨</span></div>
-                        </div>
+                        <div class="text-right"><div class="text-[#f4a261]">95 <span class="text-xs">🪨</span></div></div>
                     </div>
 
                     <div onclick="buyItem('ship')" class="flex items-center justify-between bg-[#2a180f] hover:bg-[#3a2518] p-3 rounded-xl cursor-pointer border border-[#f4a261]">
                         <div class="flex items-center gap-3">
                             <div class="text-3xl">🚀</div>
-                            <div>
-                                <div class="font-bold text-[#f4a261]">Escape Ship Kit</div>
-                                <div class="text-[10px] text-[#f4a261]/70">Final goal • 4 parts needed</div>
-                            </div>
+                            <div><div class="font-bold text-[#f4a261]">Escape Ship Kit</div><div class="text-[10px] text-[#f4a261]/70">Final goal</div></div>
                         </div>
-                        <div class="text-right">
-                            <div class="text-[#f4a261]">500 <span class="text-xs">☢️</span></div>
-                        </div>
+                        <div class="text-right"><div class="text-[#f4a261]">500 <span class="text-xs">☢️</span></div></div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Game Over / Win Modals -->
         <div id="game-over" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[300]">
             <div class="text-center">
                 <div class="text-6xl mb-4">💥</div>
                 <div class="text-3xl text-red-500 font-bold mb-2">OXYGEN DEPLETED</div>
-                <div class="text-[#f4a261] mb-6">You ran out of air on Mars...</div>
+                <div class="text-[#f4a261] mb-6">You ran out of air...</div>
                 <button onclick="restartGame()" class="px-8 py-3 bg-[#c1440e] text-white rounded-2xl font-bold">TRY AGAIN</button>
             </div>
         </div>
@@ -277,23 +153,16 @@
         <div id="win-screen" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[300]">
             <div class="text-center max-w-xs">
                 <div class="text-7xl mb-4">🎉</div>
-                <div class="text-4xl text-[#f4a261] font-bold mb-3">YOU DID IT!</div>
-                <div class="text-xl mb-4">You built the escape ship and survived Mars!</div>
-                <div class="text-sm text-[#f4a261]/70 mb-6">After many sols of digging, building, and managing oxygen, you are finally heading home to Earth.</div>
+                <div class="text-4xl text-[#f4a261] font-bold mb-3">YOU ESCAPED MARS!</div>
+                <div class="text-xl mb-4">You built everything needed and launched back to Earth!</div>
                 <button onclick="restartGame()" class="px-10 py-4 bg-gradient-to-r from-[#f4a261] to-[#c1440e] text-black font-bold rounded-2xl text-lg">PLAY AGAIN</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Tailwind
-        function initTailwind() {
-            // already using CDN
-        }
-
-        // Game Variables
         let canvas, ctx;
-        let player = { x: 400, y: 120, vx: 0, vy: 0, width: 22, height: 28, digging: false };
+        let player = { x: 380, y: 95, vx: 0, vy: 0, width: 20, height: 26 };
         let cameraY = 0;
         let o2 = 100;
         let maxO2 = 100;
@@ -302,132 +171,85 @@
         let pockets = [];
         let terrain = [];
         let particles = [];
-        let tips = [
-            "Dig deeper to find resource pockets!",
-            "Build an O₂ Pump before your air runs out!",
-            "Tap the screen near you to mine faster.",
-            "Place buildings by buying them from the store.",
-            "Collect Helium-3 for the escape ship!"
-        ];
+        let tips = ["Dig deeper underground to find glowing resource pockets!", "Buy the O₂ Pump from the store, place it, then stand near it with Ice to refill oxygen.", "Only tap to mine — walking no longer mines automatically.", "Build a Habitat and O₂ Pump early to survive longer." ];
         let currentTip = 0;
-        let lastTipTime = 0;
         let gameOver = false;
         let won = false;
-        let lastUpdate = Date.now();
 
-        // Joystick
         let joystickActive = false;
         let joystickX = 0, joystickY = 0;
-        let knobX = 55, knobY = 55;
-
-        // Input
-        let keys = {};
-        let mouseDown = false;
-        let lastTapX = 0, lastTapY = 0;
 
         function initGame() {
             canvas = document.getElementById('game-canvas');
             ctx = canvas.getContext('2d');
 
-            // Make canvas full screen in landscape
             resizeCanvas();
             window.addEventListener('resize', resizeCanvas);
             window.addEventListener('orientationchange', resizeCanvas);
 
-            // Generate terrain and pockets
             generateTerrain();
             generatePockets();
 
-            // Initial buildings (none)
-            buildings = [];
-
-            // Input handlers
             setupInput();
 
-            // Start game loop
             requestAnimationFrame(gameLoop);
 
-            // Oxygen drain
+            // Slower oxygen drain
             setInterval(() => {
                 if (!gameOver && !won) {
-                    o2 = Math.max(0, o2 - 0.8);
-                    if (o2 <= 0) {
-                        gameOver = true;
-                        document.getElementById('game-over').classList.remove('hidden');
-                        document.getElementById('game-over').classList.add('flex');
-                    }
+                    o2 = Math.max(0, o2 - 0.45);
+                    if (o2 <= 0) { gameOver = true; document.getElementById('game-over').classList.remove('hidden'); document.getElementById('game-over').classList.add('flex'); }
                     updateHUD();
                 }
-            }, 800);
+            }, 900);
 
-            // Passive income from rigs
+            // Passive rig income
             setInterval(() => {
-                if (!gameOver && !won) {
-                    const hasRig = buildings.some(b => b.type === 'rig');
-                    if (hasRig) {
-                        resources.regolith += 3;
-                        updateHUD();
-                    }
+                if (!gameOver && !won && buildings.some(b => b.type === 'rig')) {
+                    resources.regolith += 4;
+                    updateHUD();
                 }
-            }, 2500);
+            }, 2800);
 
-            // Show first tip
-            setTimeout(showNextTip, 4000);
-
-            // Starting message
-            setTimeout(() => {
-                showTip("Welcome to Mars! Move with the joystick and dig underground!");
-            }, 1500);
+            setTimeout(() => showTip("Welcome! Use the joystick to walk and tap the screen to mine."), 1800);
+            setTimeout(showNextTip, 6500);
         }
 
         function resizeCanvas() {
-            const container = document.getElementById('game-container');
-            canvas.width = Math.min(window.innerWidth, 900);
-            canvas.height = Math.min(window.innerHeight - 52, 580);
-            
-            // Adjust player start if needed
-            if (player.y > canvas.height - 80) player.y = canvas.height - 120;
+            canvas.width = Math.min(window.innerWidth, 920);
+            canvas.height = Math.min(window.innerHeight - 52, 600);
         }
 
         function generateTerrain() {
             terrain = [];
-            const cols = Math.ceil(canvas.width / 20) + 4;
-            const rows = 35;
+            const cols = Math.ceil(canvas.width / 20) + 6;
+            const rows = 38;
 
             for (let x = 0; x < cols; x++) {
                 terrain[x] = [];
-                let height = 6 + Math.floor(Math.random() * 3);
+                const surfaceHeight = 7 + Math.floor(Math.random() * 2);
                 for (let y = 0; y < rows; y++) {
-                    if (y < height) {
-                        terrain[x][y] = 'air';
-                    } else if (y < height + 3) {
-                        terrain[x][y] = 'surface';
-                    } else {
-                        terrain[x][y] = 'dirt';
-                    }
+                    if (y < surfaceHeight) terrain[x][y] = 'air';
+                    else if (y < surfaceHeight + 4) terrain[x][y] = 'surface';
+                    else terrain[x][y] = 'dirt';
+                }
+            }
+
+            // Make sure starting area is solid
+            for (let x = 14; x < 26; x++) {
+                for (let y = 7; y < 12; y++) {
+                    if (terrain[x] && terrain[x][y]) terrain[x][y] = 'surface';
                 }
             }
         }
 
         function generatePockets() {
             pockets = [];
-            for (let i = 0; i < 18; i++) {
-                const col = Math.floor(Math.random() * (terrain.length - 2)) + 1;
-                const row = 9 + Math.floor(Math.random() * 22);
-                
-                let type = 'regolith';
-                const r = Math.random();
-                if (r < 0.25) type = 'ice';
-                else if (r < 0.45) type = 'iron';
-                else if (r < 0.58) type = 'helium3';
-
-                pockets.push({
-                    x: col * 20 + 10,
-                    y: row * 18 + 90,
-                    size: 14 + Math.random() * 8,
-                    type: type,
-                    mined: false
-                });
+            for (let i = 0; i < 16; i++) {
+                const col = 3 + Math.floor(Math.random() * (terrain.length - 8));
+                const row = 10 + Math.floor(Math.random() * 24);
+                let type = Math.random() < 0.28 ? 'ice' : Math.random() < 0.45 ? 'iron' : Math.random() < 0.62 ? 'helium3' : 'regolith';
+                pockets.push({ x: col * 20 + 10, y: row * 18 + 85, size: 13 + Math.random() * 9, type, mined: false });
             }
         }
 
@@ -435,208 +257,157 @@
             const joystick = document.getElementById('joystick');
             const knob = document.getElementById('knob');
 
-            // Joystick touch
             joystick.addEventListener('touchstart', startJoystick);
             joystick.addEventListener('touchmove', moveJoystick);
             joystick.addEventListener('touchend', endJoystick);
 
-            // Tap to mine
             canvas.addEventListener('touchstart', handleTap);
             canvas.addEventListener('mousedown', handleTap);
 
-            // Keyboard (for testing)
-            window.addEventListener('keydown', (e) => keys[e.key] = true);
-            window.addEventListener('keyup', (e) => keys[e.key] = false);
-
-            // Prevent context menu
+            window.addEventListener('keydown', e => keys[e.key] = true);
+            window.addEventListener('keyup', e => keys[e.key] = false);
             canvas.addEventListener('contextmenu', e => e.preventDefault());
         }
 
-        function startJoystick(e) {
-            joystickActive = true;
-            updateJoystickPosition(e);
-        }
+        let keys = {};
 
-        function moveJoystick(e) {
-            if (!joystickActive) return;
-            updateJoystickPosition(e);
-        }
-
+        function startJoystick(e) { joystickActive = true; updateJoystick(e); }
+        function moveJoystick(e) { if (joystickActive) updateJoystick(e); }
         function endJoystick() {
             joystickActive = false;
-            joystickX = 0;
-            joystickY = 0;
-            knobX = 55;
-            knobY = 55;
-            document.getElementById('knob').style.left = knobX + 'px';
-            document.getElementById('knob').style.top = knobY + 'px';
+            joystickX = 0; joystickY = 0;
+            const knob = document.getElementById('knob');
+            knob.style.left = '23.5px';
+            knob.style.top = '23.5px';
         }
 
-        function updateJoystickPosition(e) {
+        function updateJoystick(e) {
             const rect = e.currentTarget.getBoundingClientRect();
-            const touch = e.touches ? e.touches[0] : e;
-            
-            let dx = touch.clientX - rect.left - 55;
-            let dy = touch.clientY - rect.top - 55;
+            const touch = e.touches[0];
+            let dx = touch.clientX - rect.left - 42.5;
+            let dy = touch.clientY - rect.top - 42.5;
 
             const dist = Math.hypot(dx, dy);
-            if (dist > 40) {
-                dx = (dx / dist) * 40;
-                dy = (dy / dist) * 40;
-            }
+            if (dist > 32) { dx = dx / dist * 32; dy = dy / dist * 32; }
 
-            joystickX = dx / 40;
-            joystickY = dy / 40;
+            joystickX = dx / 32;
+            joystickY = dy / 32;
 
-            knobX = 55 + dx;
-            knobY = 55 + dy;
-            document.getElementById('knob').style.left = knobX + 'px';
-            document.getElementById('knob').style.top = knobY + 'px';
+            const knob = document.getElementById('knob');
+            knob.style.left = (42.5 + dx) + 'px';
+            knob.style.top = (42.5 + dy) + 'px';
         }
 
         function handleTap(e) {
             if (gameOver || won) return;
-
             const rect = canvas.getBoundingClientRect();
             const touch = e.touches ? e.touches[0] : e;
-            
-            const worldX = touch.clientX - rect.left + (player.x - canvas.width/2);
+            const worldX = touch.clientX - rect.left + (player.x - canvas.width / 2);
             const worldY = touch.clientY - rect.top + cameraY;
 
-            // Mine at tap location if close to player
             const dist = Math.hypot(worldX - player.x, worldY - player.y);
-            if (dist < 85) {
+            if (dist < 95) {
                 mineAt(worldX, worldY);
             }
         }
 
         function mineAt(worldX, worldY) {
             const col = Math.floor(worldX / 20);
-            const row = Math.floor((worldY - 70) / 18);
+            const row = Math.floor((worldY - 68) / 18);
 
             if (col < 0 || col >= terrain.length || row < 0 || row >= terrain[0].length) return;
 
             const block = terrain[col][row];
             if (block === 'air' || block === 'surface') return;
 
-            // Break block
             terrain[col][row] = 'air';
 
-            // Give resources
-            let amount = 4 + Math.floor(Math.random() * 5);
+            let amount = 5 + Math.floor(Math.random() * 6);
             let type = 'regolith';
 
-            // Check for pocket
-            let foundPocket = false;
+            let pocketFound = false;
             for (let p of pockets) {
-                if (!p.mined && Math.hypot(p.x - worldX, p.y - worldY) < p.size + 18) {
+                if (!p.mined && Math.hypot(p.x - worldX, p.y - worldY) < p.size + 16) {
                     type = p.type;
-                    amount = 18 + Math.floor(Math.random() * 12);
+                    amount = 20 + Math.floor(Math.random() * 14);
                     p.mined = true;
-                    foundPocket = true;
-                    createParticles(p.x, p.y, 22, '#f4a261');
-                    showTip("Great find! Resource pocket mined!");
+                    createParticles(p.x, p.y, 25, '#f4a261');
+                    showTip("Awesome! You mined a rich resource pocket!");
+                    pocketFound = true;
                     break;
                 }
             }
 
-            if (!foundPocket) {
-                if (Math.random() < 0.25) type = 'ice';
-                else if (Math.random() < 0.12) type = 'iron';
+            if (!pocketFound) {
+                if (Math.random() < 0.22) type = 'ice';
+                else if (Math.random() < 0.09) type = 'iron';
             }
 
             resources[type] = (resources[type] || 0) + amount;
-            createParticles(worldX, worldY, 12, '#c1440e');
-
+            createParticles(worldX, worldY, 10, '#c1440e');
             updateHUD();
-            player.digging = true;
-            setTimeout(() => player.digging = false, 180);
         }
 
         function createParticles(x, y, count, color) {
             for (let i = 0; i < count; i++) {
-                particles.push({
-                    x, y,
-                    vx: (Math.random() - 0.5) * 3.5,
-                    vy: (Math.random() - 0.8) * 2.8,
-                    life: 22 + Math.random() * 14,
-                    color
-                });
+                particles.push({ x, y, vx: (Math.random()-0.5)*3.2, vy: (Math.random()-0.7)*2.6, life: 20 + Math.random()*12, color });
             }
         }
 
         function updatePlayer() {
             if (gameOver || won) return;
 
-            // Movement from joystick or keyboard
             let moveX = 0;
-            if (joystickActive) moveX = joystickX * 3.2;
-            if (keys['ArrowLeft'] || keys['a']) moveX -= 2.8;
-            if (keys['ArrowRight'] || keys['d']) moveX += 2.8;
+            if (joystickActive) moveX = joystickX * 2.9;
+            if (keys['ArrowLeft'] || keys['a']) moveX -= 2.6;
+            if (keys['ArrowRight'] || keys['d']) moveX += 2.6;
 
             player.x += moveX;
-            player.x = Math.max(40, Math.min(player.x, canvas.width - 60));
+            player.x = Math.max(35, Math.min(player.x, canvas.width - 55));
 
-            // Digging (downward movement when digging)
-            let digSpeed = 0;
-            if (joystickY > 0.3 || keys['ArrowDown'] || keys['s']) {
-                digSpeed = 1.8;
-                player.digging = true;
-            }
-
-            player.y += digSpeed;
-
-            // Gravity (slow fall if in air)
+            // Only fall if in air
             const col = Math.floor(player.x / 20);
-            const row = Math.floor((player.y - 70) / 18);
+            const row = Math.floor((player.y - 68) / 18);
 
+            let onGround = false;
             if (col >= 0 && col < terrain.length && row >= 0 && row < terrain[0].length) {
                 const block = terrain[col][row];
                 if (block === 'air' || block === 'surface') {
-                    player.vy = Math.min(player.vy + 0.35, 4);
+                    player.vy = Math.min(player.vy + 0.4, 5.5);
                     player.y += player.vy;
                 } else {
                     player.vy = 0;
-                    // Auto dig if stuck
-                    if (digSpeed === 0 && Math.random() < 0.08) {
-                        terrain[col][row] = 'air';
+                    onGround = true;
+                    // Prevent falling through
+                    if (player.y > row * 18 + 68) player.y = row * 18 + 68;
+                }
+            }
+
+            // O2 Pump refill logic (stand near it with ice)
+            for (let b of buildings) {
+                if (b.type === 'o2pump') {
+                    const dist = Math.hypot(player.x - b.x, player.y - b.y);
+                    if (dist < 55 && resources.ice > 0 && o2 < maxO2 - 5) {
+                        const refillAmount = Math.min(2.2, resources.ice * 0.8);
+                        o2 = Math.min(maxO2, o2 + refillAmount);
+                        resources.ice = Math.max(0, resources.ice - 0.6);
+                        if (Math.random() < 0.25) createParticles(b.x, b.y - 10, 4, '#00ff9d');
                     }
                 }
             }
 
-            // Keep player in bounds
-            if (player.y < 90) player.y = 90;
-            if (player.y > 620) player.y = 620;
+            if (player.y < 80) player.y = 80;
+            if (player.y > 680) player.y = 680;
 
-            // Camera follows player
-            const targetCamera = Math.max(0, player.y - canvas.height * 0.55);
-            cameraY = cameraY * 0.85 + targetCamera * 0.15;
-
-            // O2 drain faster when digging deep
-            if (player.y > 280 && Math.random() < 0.15) {
-                o2 = Math.max(0, o2 - 0.3);
-            }
-
-            // Auto mine nearby blocks when moving
-            if (Math.abs(moveX) > 0.5 && Math.random() < 0.35) {
-                const mx = player.x + (moveX > 0 ? 18 : -18);
-                mineAt(mx, player.y + 8);
-            }
+            const targetCam = Math.max(0, player.y - canvas.height * 0.58);
+            cameraY = cameraY * 0.82 + targetCam * 0.18;
         }
 
         function updateHUD() {
-            // O2
-            const o2Percent = Math.max(0, Math.min(100, o2));
-            document.getElementById('o2-bar').style.width = o2Percent + '%';
-            document.getElementById('o2-text').textContent = Math.floor(o2Percent);
+            const pct = Math.max(0, Math.min(100, o2));
+            document.getElementById('o2-bar').style.width = pct + '%';
+            document.getElementById('o2-text').textContent = Math.floor(pct);
 
-            if (o2Percent < 25) {
-                document.getElementById('o2-bar').style.background = 'linear-gradient(to right, #ff4444, #ff8800)';
-            } else {
-                document.getElementById('o2-bar').style.background = 'linear-gradient(to right, #00ff9d, #00cc7a)';
-            }
-
-            // Resources
             document.getElementById('regolith').textContent = Math.floor(resources.regolith);
             document.getElementById('ice').textContent = Math.floor(resources.ice);
             document.getElementById('iron').textContent = Math.floor(resources.iron);
@@ -644,97 +415,59 @@
         }
 
         function showTip(text) {
-            const tipBox = document.getElementById('tip-box');
-            const tipText = document.getElementById('tip-text');
-            tipText.textContent = text;
-            tipBox.classList.remove('hidden');
-            tipBox.style.opacity = '1';
-
-            setTimeout(() => {
-                tipBox.style.transition = 'opacity 0.6s';
-                tipBox.style.opacity = '0';
-                setTimeout(() => {
-                    tipBox.classList.add('hidden');
-                    tipBox.style.transition = '';
-                }, 600);
-            }, 3800);
+            const box = document.getElementById('tip-box');
+            const txt = document.getElementById('tip-text');
+            txt.textContent = text;
+            box.classList.remove('hidden');
+            box.style.opacity = '1';
+            setTimeout(() => { box.style.transition = 'opacity 0.7s'; box.style.opacity = '0'; setTimeout(() => { box.classList.add('hidden'); box.style.transition = ''; }, 700); }, 4200);
         }
 
         function showNextTip() {
             if (gameOver || won) return;
             showTip(tips[currentTip % tips.length]);
             currentTip++;
-            setTimeout(showNextTip, 22000);
+            setTimeout(showNextTip, 26000);
         }
 
         function toggleStore() {
-            const modal = document.getElementById('store-modal');
-            modal.classList.toggle('hidden');
+            document.getElementById('store-modal').classList.toggle('hidden');
         }
 
         function buyItem(type) {
-            let cost = 0;
-            let resourceType = 'regolith';
+            let cost = 0, res = 'regolith';
+            if (type === 'o2pump') { cost = 120; res = 'iron'; }
+            else if (type === 'laser') { cost = 85; res = 'regolith'; }
+            else if (type === 'habitat') { cost = 150; res = 'ice'; }
+            else if (type === 'rig') { cost = 200; res = 'regolith'; }
+            else if (type === 'solar') { cost = 95; res = 'regolith'; }
+            else if (type === 'ship') { cost = 500; res = 'helium3'; }
 
-            if (type === 'o2pump') { cost = 120; resourceType = 'iron'; }
-            else if (type === 'laser') { cost = 85; resourceType = 'regolith'; }
-            else if (type === 'habitat') { cost = 150; resourceType = 'ice'; }
-            else if (type === 'rig') { cost = 200; resourceType = 'regolith'; }
-            else if (type === 'solar') { cost = 95; resourceType = 'regolith'; }
-            else if (type === 'ship') { cost = 500; resourceType = 'helium3'; }
+            if (resources[res] < cost) { showTip("Not enough resources!"); return; }
+            resources[res] -= cost;
 
-            if (resources[resourceType] < cost) {
-                showTip("Not enough resources!");
-                return;
+            if (['o2pump','habitat','rig','solar'].includes(type)) {
+                buildings.push({ x: player.x + (Math.random()-0.5)*60, y: player.y - 25, type });
+                showTip("Building placed! " + (type === 'o2pump' ? "Stand near it with Ice to refill O₂" : ""));
             }
 
-            resources[resourceType] -= cost;
-
-            // Add visual building
-            if (type === 'o2pump' || type === 'habitat' || type === 'rig' || type === 'solar') {
-                const placeX = player.x + (Math.random() - 0.5) * 80;
-                buildings.push({
-                    x: Math.max(60, Math.min(placeX, canvas.width - 60)),
-                    y: player.y - 30,
-                    type: type
-                });
-                showTip("Building placed! Check the map.");
-            }
-
-            // Effects
-            if (type === 'o2pump') {
-                o2 = Math.min(maxO2 + 40, o2 + 55);
-                maxO2 += 25;
-                showTip("O₂ Pump installed! Oxygen restored.");
-            } else if (type === 'laser') {
-                showTip("Laser upgraded! Mining is faster.");
-            } else if (type === 'habitat') {
-                maxO2 += 35;
-                o2 = Math.min(maxO2, o2 + 30);
-                showTip("Habitat built! More oxygen capacity.");
-            } else if (type === 'rig') {
-                showTip("Auto Mining Rig placed! Passive income started.");
-            } else if (type === 'solar') {
-                showTip("Solar Array placed! Equipment powered.");
-            } else if (type === 'ship') {
-                checkWinCondition();
-            }
+            if (type === 'o2pump') { o2 = Math.min(maxO2 + 30, o2 + 40); maxO2 += 20; showTip("O₂ Pump placed! Load it with Ice by standing nearby."); }
+            else if (type === 'habitat') { maxO2 += 30; o2 = Math.min(maxO2, o2 + 25); }
+            else if (type === 'ship') { checkWin(); }
 
             updateHUD();
             toggleStore();
         }
 
-        function checkWinCondition() {
-            const hasShip = buildings.some(b => b.type === 'ship') || resources.helium3 >= 30;
-            const hasO2 = buildings.some(b => b.type === 'o2pump') && buildings.some(b => b.type === 'habitat');
-
-            if (hasShip && hasO2 && resources.iron >= 80 && resources.helium3 >= 25) {
+        function checkWin() {
+            const hasPump = buildings.some(b => b.type === 'o2pump');
+            const hasHabitat = buildings.some(b => b.type === 'habitat');
+            if (hasPump && hasHabitat && resources.helium3 >= 28 && resources.iron >= 70) {
                 won = true;
                 document.getElementById('win-screen').classList.remove('hidden');
                 document.getElementById('win-screen').classList.add('flex');
-                showTip("Congratulations! You escaped Mars!");
             } else {
-                showTip("You need more resources and buildings to launch!");
+                showTip("Need O₂ Pump + Habitat + more Helium-3 & Iron to escape!");
             }
         }
 
@@ -742,123 +475,72 @@
             ctx.save();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Sky background
-            const skyGrad = ctx.createLinearGradient(0, 0, 0, canvas.height);
-            skyGrad.addColorStop(0, '#1a0f2e');
-            skyGrad.addColorStop(0.5, '#2a180f');
-            ctx.fillStyle = skyGrad;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const sky = ctx.createLinearGradient(0, 0, 0, canvas.height);
+            sky.addColorStop(0, '#1a0f2e'); sky.addColorStop(0.55, '#2a180f');
+            ctx.fillStyle = sky; ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Draw terrain
-            const tileSize = 20;
+            const tile = 20;
             const startRow = Math.floor(cameraY / 18);
 
             for (let x = 0; x < terrain.length; x++) {
-                for (let y = startRow; y < startRow + 32; y++) {
+                for (let y = startRow; y < startRow + 34; y++) {
                     if (y < 0 || y >= terrain[x].length) continue;
-
+                    const drawY = y * 18 - cameraY + 68;
                     const block = terrain[x][y];
-                    const drawY = y * 18 - cameraY + 70;
 
-                    if (block === 'dirt') {
-                        ctx.fillStyle = '#5c4033';
-                        ctx.fillRect(x * tileSize, drawY, tileSize, 18);
-                        ctx.fillStyle = '#3a2a1f';
-                        ctx.fillRect(x * tileSize + 2, drawY + 4, tileSize - 4, 3);
-                    } else if (block === 'surface') {
-                        ctx.fillStyle = '#8b3a0f';
-                        ctx.fillRect(x * tileSize, drawY, tileSize, 18);
-                        ctx.fillStyle = '#c1440e';
-                        ctx.fillRect(x * tileSize, drawY, tileSize, 5);
-                    }
+                    if (block === 'dirt') { ctx.fillStyle = '#5c4033'; ctx.fillRect(x*tile, drawY, tile, 18); }
+                    else if (block === 'surface') { ctx.fillStyle = '#8b3a0f'; ctx.fillRect(x*tile, drawY, tile, 18); ctx.fillStyle = '#c1440e'; ctx.fillRect(x*tile, drawY, tile, 6); }
                 }
             }
 
-            // Draw resource pockets
+            // Pockets
             for (let p of pockets) {
                 if (p.mined) continue;
-                const drawY = p.y - cameraY + 70;
-                if (drawY < -30 || drawY > canvas.height + 30) continue;
-
-                ctx.fillStyle = p.type === 'helium3' ? '#a78bfa' : 
-                               p.type === 'iron' ? '#94a3b8' : 
-                               p.type === 'ice' ? '#bae6fd' : '#f4a261';
-                ctx.beginPath();
-                ctx.arc(p.x, drawY, p.size, 0, Math.PI * 2);
-                ctx.fill();
-
-                ctx.strokeStyle = '#f4a261';
-                ctx.lineWidth = 2;
-                ctx.stroke();
+                const dy = p.y - cameraY + 68;
+                if (dy < -40 || dy > canvas.height + 40) continue;
+                ctx.fillStyle = p.type === 'helium3' ? '#a78bfa' : p.type === 'iron' ? '#94a3b8' : p.type === 'ice' ? '#bae6fd' : '#f4a261';
+                ctx.beginPath(); ctx.arc(p.x, dy, p.size, 0, Math.PI*2); ctx.fill();
+                ctx.strokeStyle = '#f4a261'; ctx.lineWidth = 2; ctx.stroke();
             }
 
-            // Draw buildings
+            // Buildings
             for (let b of buildings) {
-                const drawY = b.y - cameraY + 70;
-                if (drawY < -40 || drawY > canvas.height + 40) continue;
+                const dy = b.y - cameraY + 68;
+                if (dy < -50 || dy > canvas.height + 50) continue;
 
                 if (b.type === 'o2pump') {
-                    ctx.fillStyle = '#22c55e';
-                    ctx.fillRect(b.x - 12, drawY - 8, 24, 28);
-                    ctx.fillStyle = '#fff';
-                    ctx.fillRect(b.x - 4, drawY - 2, 8, 14);
+                    ctx.fillStyle = '#16a34a'; ctx.fillRect(b.x-14, dy-6, 28, 32);
+                    ctx.fillStyle = '#fff'; ctx.fillRect(b.x-5, dy+2, 10, 16);
+                    ctx.fillStyle = '#22c55e'; ctx.fillRect(b.x-3, dy+6, 6, 8);
                 } else if (b.type === 'habitat') {
-                    ctx.fillStyle = '#eab308';
-                    ctx.fillRect(b.x - 18, drawY - 6, 36, 26);
-                    ctx.fillStyle = '#1a120b';
-                    ctx.fillRect(b.x - 10, drawY + 2, 20, 12);
+                    ctx.fillStyle = '#eab308'; ctx.fillRect(b.x-16, dy-4, 32, 24);
+                    ctx.fillStyle = '#1a120b'; ctx.fillRect(b.x-9, dy+4, 18, 10);
                 } else if (b.type === 'rig') {
-                    ctx.fillStyle = '#64748b';
-                    ctx.fillRect(b.x - 14, drawY - 4, 28, 22);
-                    ctx.fillStyle = '#f4a261';
-                    ctx.fillRect(b.x - 6, drawY + 6, 12, 8);
+                    ctx.fillStyle = '#64748b'; ctx.fillRect(b.x-13, dy-2, 26, 20);
+                    ctx.fillStyle = '#f4a261'; ctx.fillRect(b.x-5, dy+5, 10, 7);
                 } else if (b.type === 'solar') {
-                    ctx.fillStyle = '#f4a261';
-                    ctx.fillRect(b.x - 16, drawY - 10, 32, 8);
-                    ctx.fillStyle = '#eab308';
-                    ctx.fillRect(b.x - 6, drawY - 2, 12, 18);
+                    ctx.fillStyle = '#f4a261'; ctx.fillRect(b.x-15, dy-8, 30, 7);
+                    ctx.fillStyle = '#eab308'; ctx.fillRect(b.x-5, dy-1, 10, 16);
                 }
             }
 
-            // Draw player (astronaut)
-            const drawY = player.y - cameraY + 70;
+            // Player
+            const py = player.y - cameraY + 68;
             ctx.fillStyle = '#f4a261';
-            ctx.fillRect(player.x - 11, drawY - 22, 22, 26);
-
-            // Helmet
+            ctx.fillRect(player.x - 10, py - 20, 20, 24);
             ctx.fillStyle = '#e8d5a3';
-            ctx.beginPath();
-            ctx.arc(player.x, drawY - 28, 12, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = '#c1440e';
-            ctx.lineWidth = 3;
-            ctx.stroke();
+            ctx.beginPath(); ctx.arc(player.x, py - 26, 11, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#c1440e'; ctx.lineWidth = 3; ctx.stroke();
+            ctx.fillStyle = '#0a0a1f'; ctx.fillRect(player.x - 6, py - 32, 12, 7);
 
-            // Visor
-            ctx.fillStyle = '#0a0a1f';
-            ctx.fillRect(player.x - 7, drawY - 34, 14, 8);
-
-            // Drill effect
-            if (player.digging) {
-                ctx.strokeStyle = '#f4a261';
-                ctx.lineWidth = 4;
-                ctx.beginPath();
-                ctx.moveTo(player.x + 8, drawY - 12);
-                ctx.lineTo(player.x + 22, drawY - 4);
-                ctx.stroke();
-            }
-
-            // Draw particles
-            for (let i = particles.length - 1; i >= 0; i--) {
+            // Particles
+            for (let i = particles.length-1; i >= 0; i--) {
                 const p = particles[i];
-                ctx.globalAlpha = p.life / 30;
+                ctx.globalAlpha = p.life / 28;
                 ctx.fillStyle = p.color;
-                ctx.fillRect(p.x, p.y - cameraY + 70, 3, 3);
-                p.x += p.vx;
-                p.y += p.vy;
-                p.vy += 0.1;
-                p.life--;
-                if (p.life <= 0) particles.splice(i, 1);
+                ctx.fillRect(p.x, p.y - cameraY + 68, 3, 3);
+                p.x += p.vx; p.y += p.vy; p.vy += 0.09; p.life--;
+                if (p.life <= 0) particles.splice(i,1);
             }
             ctx.globalAlpha = 1;
 
@@ -866,29 +548,15 @@
         }
 
         function gameLoop() {
-            if (!gameOver && !won) {
-                updatePlayer();
-                updateHUD();
-            }
-
+            if (!gameOver && !won) updatePlayer();
+            updateHUD();
             draw();
-
-            // Occasional tip
-            if (Date.now() - lastTipTime > 28000 && !gameOver && !won) {
-                showNextTip();
-                lastTipTime = Date.now();
-            }
-
             requestAnimationFrame(gameLoop);
         }
 
-        function restartGame() {
-            location.reload();
-        }
+        function restartGame() { location.reload(); }
 
-        // Boot
         window.onload = () => {
-            initTailwind();
             initGame();
             updateHUD();
         };
