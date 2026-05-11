@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mars Miner: Escape to Earth 🚀</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&amp;display=swap');
+        
+        :root {
+            --mars-red: #c1440e;
+        }
+        
+        body {
+            background: linear-gradient(#0a0a1f, #1a0f2e);
+            font-family: 'Press Start 2P', system-ui;
+            image-rendering: pixelated;
+        }
+        
+        .mars-bg {
+            background: linear-gradient(#3a1f0f, #c1440e 40%, #8b3a0f);
+        }
+        
+        .game-container {
+            box-shadow: 0 0 30px rgba(193, 68, 14, 0.6);
+            border: 4px solid #f4a261;
+        }
+        
+        .resource-card {
+            transition: transform 0.1s ease;
+        }
+        
+        .resource-card:active {
+            transform: scale(0.95);
+        }
+        
+        .neon-text {
+            text-shadow: 0 0 10px #f4a261, 0 0 20px #c1440e;
+        }
+        
+        canvas {
+            border: 3px solid #f4a261;
+            border-radius: 8px;
+            image-rendering: crisp-edges;
+            touch-action: none;
+        }
+        
+        .pixel-btn {
+            font-family: 'Press Start 2P', system-ui;
+            image-rendering: pixelated;
+            box-shadow: 4px 4px 0 #000;
+            transition: all 0.1s ease;
+        }
+        
+        .pixel-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000;
+        }
+        
+        .log-entry {
+            font-size: 10px;
+            line-height: 1.3;
+        }
+        
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #f4a261;
+        }
+    </style>
+</head>
+<body class="bg-[#0a0a1f] text-white min-h-screen">
+    <div class="max-w-[420px] mx-auto p-3">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-4 pt-2">
+            <div class="flex items-center gap-3">
+                <div class="text-5xl">🪐</div>
+                <div>
+                    <h1 class="text-3xl font-bold neon-text text-[#f4a261]">MARS MINER</h1>
+                    <p class="text-xs text-[#f4a261]/70 -mt-1">ESCAPE TO EARTH</p>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="text-[10px] text-[#f4a261]/60">SOL 42</div>
+                <div class="text-xs px-2 py-0.5 bg-[#c1440e] rounded text-white">SURVIVAL MODE</div>
+            </div>
+        </div>
+
+        <!-- Resources -->
+        <div class="mb-4">
+            <div class="text-xs text-[#f4a261] mb-1.5 px-1">RESOURCES INVENTORY</div>
+            <div class="grid grid-cols-2 gap-2">
+                <!-- Regolith -->
+                <div class="resource-card bg-[#1f140f] border border-[#c1440e] p-3 rounded-xl flex items-center gap-3">
+                    <div class="text-4xl">🪨</div>
+                    <div class="flex-1">
+                        <div class="text-xs text-[#f4a261]">REGOLITH</div>
+                        <div id="regolith" class="stat-value">0</div>
+                    </div>
+                </div>
+                <!-- Ice -->
+                <div class="resource-card bg-[#1f140f] border border-[#c1440e] p-3 rounded-xl flex items-center gap-3">
+                    <div class="text-4xl">❄️</div>
+                    <div class="flex-1">
+                        <div class="text-xs text-[#f4a261]">WATER ICE</div>
+                        <div id="ice" class="stat-value">0</div>
+                    </div>
+                </div>
+                <!-- Iron -->
+                <div class="resource-card bg-[#1f140f] border border-[#c1440e] p-3 rounded-xl flex items-center gap-3">
+                    <div class="text-4xl">⛓️</div>
+                    <div class="flex-1">
+                        <div class="text-xs text-[#f4a261]">IRON ORE</div>
+                        <div id="iron" class="stat-value">0</div>
+                    </div>
+                </div>
+                <!-- Helium -->
+                <div class="resource-card bg-[#1f140f] border border-[#c1440e] p-3 rounded-xl flex items-center gap-3">
+                    <div class="text-4xl">☢️</div>
+                    <div class="flex-1">
+                        <div class="text-xs text-[#f4a261]">HELIUM-3</div>
+                        <div id="helium3" class="stat-value">0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Canvas -->
+        <div class="mb-3">
+            <div class="flex justify-between items-center mb-1.5 px-1">
+                <div class="text-xs text-[#f4a261]">MARS SURFACE • TAP TO DRILL</div>
+                <div id="efficiency" class="text-[10px] px-2 py-px bg-[#c1440e]/30 rounded text-[#f4a261]">EFF: 1.0x</div>
+            </div>
+            <canvas id="game-canvas" width="400" height="280" class="w-full bg-[#2a180f] rounded-xl cursor-crosshair"></canvas>
+            <div class="text-center mt-1">
+                <div id="mine-status" class="text-[10px] text-[#f4a261]/60">Tap rocks to mine • 4 resources available</div>
+            </div>
+        </div>
+
+        <!-- Mining Upgrades -->
+        <div class="mb-4 bg-[#1a120b] border border-[#c1440e]/50 rounded-2xl p-4">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="text-xl">⛏️</div>
+                <div class="font-bold text-sm">MINING UPGRADES</div>
+            </div>
+            
+            <div class="space-y-3">
+                <!-- Laser -->
+                <div class="flex items-center justify-between bg-[#2a180f] p-3 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl">🔥</div>
+                        <div>
+                            <div class="font-bold text-sm">MINING LASER</div>
+                            <div class="text-[10px] text-[#f4a261]/70">Level <span id="laser-level">1</span> • +15% yield</div>
+                        </div>
+                    </div>
+                    <button onclick="buyUpgrade('laser')" class="pixel-btn bg-[#c1440e] hover:bg-[#e85d04] active:bg-[#a63a0a] text-white text-xs px-4 py-2 rounded-lg font-bold">BUY<br><span id="laser-cost" class="text-[10px]">25 REG</span></button>
+                </div>
+
+                <!-- Drones -->
+                <div class="flex items-center justify-between bg-[#2a180f] p-3 rounded-xl">
+                    <div class="flex items-center gap-3">
+                        <div class="text-3xl">🤖</div>
+                        <div>
+                            <div class="font-bold text-sm">MINING DRONES</div>
+                            <div class="text-[10px] text-[#f4a261]/70">Level <span id="drone-level">0</span> • Passive +<span id="drone-rate">0</span>/s</div>
+                        </div>
+                    </div>
+                    <button onclick="buyUpgrade('drone')" class="pixel-btn bg-[#c1440e] hover:bg-[#e85d04] active:bg-[#a63a0a] text-white text-xs px-4 py-2 rounded-lg font-bold">BUY<br><span id="drone-cost" class="text-[10px]">40 REG</span></button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Base Construction -->
+        <div class="mb-4 bg-[#1a120b] border border-[#c1440e]/50 rounded-2xl p-4">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="text-xl">🏗️</div>
+                <div class="font-bold text-sm">BASE CONSTRUCTION</div>
+            </div>
+            
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <!-- Solar -->
+                <div class="bg-[#2a180f] p-3 rounded-xl">
+                    <div class="flex justify-between">
+                        <div>
+                            <div class="font-bold">☀️ SOLAR ARRAY</div>
+                            <div class="text-[#f4a261]/70 text-[9px]">Lvl <span id="solar-level">0</span></div>
+                        </div>
+                        <button onclick="buyBuilding('solar')" class="pixel-btn bg-[#c1440e] text-[9px] px-3 py-1.5 rounded font-bold">+<span id="solar-cost">15</span></button>
+                    </div>
+                    <div class="text-[9px] mt-1 text-emerald-400">+<span id="solar-effect">0</span> energy/s</div>
+                </div>
+
+                <!-- Habitat -->
+                <div class="bg-[#2a180f] p-3 rounded-xl">
+                    <div class="flex justify-between">
+                        <div>
+                            <div class="font-bold">🏠 HABITAT</div>
+                            <div class="text-[#f4a261]/70 text-[9px]">Lvl <span id="habitat-level">0</span></div>
+                        </div>
+                        <button onclick="buyBuilding('habitat')" class="pixel-btn bg-[#c1440e] text-[9px] px-3 py-1.5 rounded font-bold">+<span id="habitat-cost">30</span></button>
+                    </div>
+                    <div class="text-[9px] mt-1 text-emerald-400">Survival boost</div>
+                </div>
+
+                <!-- Rig -->
+                <div class="bg-[#2a180f] p-3 rounded-xl">
+                    <div class="flex justify-between">
+                        <div>
+                            <div class="font-bold">⚙️ MINING RIG</div>
+                            <div class="text-[#f4a261]/70 text-[9px]">Lvl <span id="rig-level">0</span></div>
+                        </div>
+                        <button onclick="buyBuilding('rig')" class="pixel-btn bg-[#c1440e] text-[9px] px-3 py-1.5 rounded font-bold">+<span id="rig-cost">50</span></button>
+                    </div>
+                    <div class="text-[9px] mt-1 text-emerald-400">+<span id="rig-effect">0</span> reg/s</div>
+                </div>
+
+                <!-- Refinery -->
+                <div class="bg-[#2a180f] p-3 rounded-xl">
+                    <div class="flex justify-between">
+                        <div>
+                            <div class="font-bold">🏭 REFINERY</div>
+                            <div class="text-[#f4a261]/70 text-[9px]">Lvl <span id="refinery-level">0</span></div>
+                        </div>
+                        <button onclick="buyBuilding('refinery')" class="pixel-btn bg-[#c1440e] text-[9px] px-3 py-1.5 rounded font-bold">+<span id="refinery-cost">80</span></button>
+                    </div>
+                    <div class="text-[9px] mt-1 text-emerald-400">+<span id="refinery-effect">0</span>% yield</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ship Development -->
+        <div class="mb-4 bg-gradient-to-br from-[#3a1f0f] to-[#1a120b] border-2 border-[#f4a261] rounded-2xl p-4">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="text-xl">🚀</div>
+                <div class="font-bold text-sm">ESCAPE SHIP PROGRESS</div>
+            </div>
+            
+            <div class="mb-3">
+                <div class="flex justify-between text-xs mb-1">
+                    <div>SHIP COMPONENTS</div>
+                    <div id="ship-progress" class="font-mono text-[#f4a261]">0 / 4</div>
+                </div>
+                <div class="h-3 bg-[#2a180f] rounded-full overflow-hidden border border-[#c1440e]">
+                    <div id="ship-bar" class="h-3 bg-gradient-to-r from-[#f4a261] to-[#c1440e] transition-all" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-4 gap-2 text-center text-[10px]">
+                <div>
+                    <div class="text-xl mb-0.5">🪨</div>
+                    <div id="ship-regolith" class="font-mono">0/500</div>
+                </div>
+                <div>
+                    <div class="text-xl mb-0.5">❄️</div>
+                    <div id="ship-ice" class="font-mono">0/200</div>
+                </div>
+                <div>
+                    <div class="text-xl mb-0.5">⛓️</div>
+                    <div id="ship-iron" class="font-mono">0/150</div>
+                </div>
+                <div>
+                    <div class="text-xl mb-0.5">☢️</div>
+                    <div id="ship-helium" class="font-mono">0/30</div>
+                </div>
+            </div>
+
+            <button onclick="attemptLaunch()" id="launch-btn"
+                    class="mt-4 w-full pixel-btn hidden bg-gradient-to-r from-[#f4a261] to-[#c1440e] hover:brightness-110 text-black font-bold py-3 rounded-xl text-sm">
+                🚀 LAUNCH ESCAPE SHIP!
+            </button>
+            <div id="launch-hint" class="text-center text-[10px] text-[#f4a261]/60 mt-1">Collect required resources above</div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="bg-[#1a120b] border border-[#c1440e]/50 rounded-2xl p-3 mb-4">
+            <div class="flex justify-between items-center mb-2">
+                <div class="text-xs text-[#f4a261]">MISSION LOG</div>
+                <button onclick="clearLog()" class="text-[10px] text-[#f4a261]/60 hover:text-white">CLEAR</button>
+            </div>
+            <div id="log" class="h-20 overflow-y-auto text-[10px] text-[#f4a261]/80 space-y-px pr-1 font-mono"></div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-[9px] text-[#f4a261]/50">
+            Made for you on Mars • Tap to survive • v1.0
+        </div>
+    </div>
+
+    <!-- Win Modal -->
+    <div id="win-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+        <div class="max-w-[340px] mx-4 bg-[#1a120b] border-4 border-[#f4a261] rounded-3xl p-8 text-center">
+            <div class="text-7xl mb-4">🎉</div>
+            <h2 class="text-3xl font-bold text-[#f4a261] mb-2">MISSION COMPLETE!</h2>
+            <p class="text-xl mb-4">You built the escape ship and are now returning to Earth!</p>
+            <div class="text-sm text-[#f4a261]/70 mb-6">After 42 sols of mining, drilling, and surviving the harsh Martian environment, you finally made it home.</div>
+            
+            <div class="flex gap-3">
+                <button onclick="restartGame()" class="flex-1 pixel-btn bg-[#c1440e] text-white py-3 rounded-2xl font-bold text-sm">PLAY AGAIN</button>
+                <button onclick="shareWin()" class="flex-1 pixel-btn bg-[#f4a261] text-black py-3 rounded-2xl font-bold text-sm">SHARE</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tailwind script
+        function initTailwind() {
+            document.documentElement.style.setProperty('--accent', '#f4a261');
+        }
+
+        // Game State
+        let resources = {
+            regolith: 0,
+            ice: 0,
+            iron: 0,
+            helium3: 0
+        };
+
+        let upgrades = {
+            laser: 1,
+            drone: 0
+        };
+
+        let buildings = {
+            solar: 0,
+            habitat: 0,
+            rig: 0,
+            refinery: 0
+        };
+
+        let energy = 0;
+        let lastTime = Date.now();
+        let particles = [];
+        let rocks = [];
+        let isMining = false;
+        let miningTimeout = null;
+        let gameSaved = false;
+
+        const SHIP_REQUIREMENTS = {
+            regolith: 500,
+            ice: 200,
+            iron: 150,
+            helium3: 30
+        };
+
+        // Canvas setup
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d', { alpha: true });
+
+        function initRocks() {
+            rocks = [];
+            for (let i = 0; i < 7; i++) {
+                rocks.push({
+                    x: 40 + Math.random() * 320,
+                    y: 110 + Math.random() * 130,
+                    size: 18 + Math.random() * 14,
+                    health: 3 + Math.floor(Math.random() * 3),
+                    maxHealth: 3 + Math.floor(Math.random() * 3),
+                    type: Math.random() > 0.7 ? 'rare' : 'normal'
+                });
+            }
+        }
+
+        function drawBackground() {
+            // Sky gradient
+            const grad = ctx.createLinearGradient(0, 0, 0, 280);
+            grad.addColorStop(0, '#1a0f2e');
+            grad.addColorStop(0.4, '#2a180f');
+            grad.addColorStop(1, '#3a1f0f');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 400, 280);
+
+            // Stars
+            ctx.fillStyle = '#f4a261';
+            for (let i = 0; i < 35; i++) {
+                const x = (i * 37) % 390 + 5;
+                const y = (i * 19) % 90 + 8;
+                ctx.fillRect(x, y, 1.5, 1.5);
+            }
+
+            // Distant mountains
+            ctx.fillStyle = '#5c2f1a';
+            ctx.beginPath();
+            ctx.moveTo(0, 140);
+            ctx.lineTo(80, 90);
+            ctx.lineTo(160, 130);
+            ctx.lineTo(240, 75);
+            ctx.lineTo(320, 115);
+            ctx.lineTo(400, 95);
+            ctx.lineTo(400, 280);
+            ctx.lineTo(0, 280);
+            ctx.fill();
+
+            // Ground
+            ctx.fillStyle = '#8b3a0f';
+            ctx.fillRect(0, 160, 400, 120);
+            
+            // Surface texture
+            ctx.fillStyle = '#c1440e';
+            for (let i = 0; i < 20; i++) {
+                ctx.fillRect(10 + i * 20, 165 + Math.sin(i) * 8, 8, 3);
+            }
+        }
+
+        function drawMiner() {
+            const baseY = 235;
+            const bob = Math.sin(Date.now() / 180) * 1.5;
+            
+            // Body
+            ctx.fillStyle = '#f4a261';
+            ctx.fillRect(175, baseY + bob - 28, 50, 38);
+            
+            // Helmet
+            ctx.fillStyle = '#e8d5a3';
+            ctx.beginPath();
+            ctx.arc(200, baseY + bob - 35, 18, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#c1440e';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Visor
+            ctx.fillStyle = '#0a0a1f';
+            ctx.fillRect(188, baseY + bob - 42, 24, 12);
+            
+            // Drill arm (animated when mining)
+            const drillOffset = isMining ? Math.sin(Date.now() / 60) * 8 : 0;
+            ctx.strokeStyle = '#f4a261';
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(225, baseY + bob - 18);
+            ctx.lineTo(255 + drillOffset, baseY + bob - 8);
+            ctx.stroke();
+            
+            // Drill bit
+            ctx.fillStyle = '#c1440e';
+            ctx.fillRect(252 + drillOffset, baseY + bob - 15, 18, 8);
+            
+            // Legs
+            ctx.strokeStyle = '#f4a261';
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(185, baseY + bob + 10);
+            ctx.lineTo(178, baseY + bob + 38);
+            ctx.moveTo(215, baseY + bob + 10);
+            ctx.lineTo(222, baseY + bob + 38);
+            ctx.stroke();
+        }
+
+        function drawRocks() {
+            rocks.forEach((rock, index) => {
+                if (rock.health <= 0) return;
+                
+                const healthPercent = rock.health / rock.maxHealth;
+                
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.4)';
+                ctx.beginPath();
+                ctx.ellipse(rock.x + 4, rock.y + rock.size + 6, rock.size * 0.8, 6, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Rock body
+                ctx.fillStyle = rock.type === 'rare' ? '#6b4e3a' : '#5c4033';
+                ctx.beginPath();
+                ctx.arc(rock.x, rock.y, rock.size, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Cracks / details
+                ctx.strokeStyle = '#3a2a1f';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath();
+                ctx.moveTo(rock.x - rock.size * 0.6, rock.y - rock.size * 0.3);
+                ctx.lineTo(rock.x + rock.size * 0.5, rock.y + rock.size * 0.4);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(rock.x + rock.size * 0.2, rock.y - rock.size * 0.5);
+                ctx.lineTo(rock.x - rock.size * 0.4, rock.y + rock.size * 0.2);
+                ctx.stroke();
+                
+                // Health bar
+                if (healthPercent < 1) {
+                    ctx.fillStyle = '#c1440e';
+                    ctx.fillRect(rock.x - rock.size, rock.y - rock.size - 10, rock.size * 2 * healthPercent, 4);
+                    ctx.strokeStyle = '#f4a261';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(rock.x - rock.size, rock.y - rock.size - 10, rock.size * 2, 4);
+                }
+            });
+        }
+
+        function drawParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                ctx.save();
+                ctx.globalAlpha = p.life / p.maxLife;
+                ctx.fillStyle = p.color;
+                ctx.fillRect(p.x, p.y, p.size, p.size);
+                ctx.restore();
+                
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.12; // gravity
+                p.life--;
+                
+                if (p.life <= 0) particles.splice(i, 1);
+            }
+        }
+
+        function createParticles(x, y, count, color) {
+            for (let i = 0; i < count; i++) {
+                particles.push({
+                    x: x,
+                    y: y,
+                    vx: (Math.random() - 0.5) * 3.5,
+                    vy: (Math.random() - 0.8) * 2.5 - 1,
+                    size: 2 + Math.random() * 3,
+                    life: 18 + Math.random() * 12,
+                    maxLife: 30,
+                    color: color
+                });
+            }
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, 400, 280);
+            drawBackground();
+            drawRocks();
+            drawMiner();
+            drawParticles();
+            
+            // Mining flash
+            if (isMining) {
+                ctx.strokeStyle = '#f4a261';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(200, 210, 35 + Math.sin(Date.now() / 50) * 8, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+        }
+
+        function gameLoop() {
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updateUI() {
+            // Resources
+            document.getElementById('regolith').textContent = Math.floor(resources.regolith);
+            document.getElementById('ice').textContent = Math.floor(resources.ice);
+            document.getElementById('iron').textContent = Math.floor(resources.iron);
+            document.getElementById('helium3').textContent = Math.floor(resources.helium3);
+
+            // Upgrades
+            document.getElementById('laser-level').textContent = upgrades.laser;
+            document.getElementById('laser-cost').textContent = `${Math.floor(25 * Math.pow(1.6, upgrades.laser - 1))} REG`;
+            
+            document.getElementById('drone-level').textContent = upgrades.drone;
+            const droneRate = upgrades.drone * 0.8;
+            document.getElementById('drone-rate').textContent = droneRate.toFixed(1);
+            document.getElementById('drone-cost').textContent = `${Math.floor(40 * Math.pow(1.7, upgrades.drone))} REG`;
+
+            // Buildings
+            document.getElementById('solar-level').textContent = buildings.solar;
+            document.getElementById('solar-cost').textContent = Math.floor(15 * Math.pow(1.5, buildings.solar));
+            document.getElementById('solar-effect').textContent = (buildings.solar * 0.6).toFixed(1);
+            
+            document.getElementById('habitat-level').textContent = buildings.habitat;
+            document.getElementById('habitat-cost').textContent = Math.floor(30 * Math.pow(1.6, buildings.habitat));
+            
+            document.getElementById('rig-level').textContent = buildings.rig;
+            document.getElementById('rig-effect').textContent = (buildings.rig * 1.2).toFixed(1);
+            document.getElementById('rig-cost').textContent = Math.floor(50 * Math.pow(1.55, buildings.rig));
+            
+            document.getElementById('refinery-level').textContent = buildings.refinery;
+            document.getElementById('refinery-effect').textContent = (buildings.refinery * 8).toFixed(0);
+            document.getElementById('refinery-cost').textContent = Math.floor(80 * Math.pow(1.65, buildings.refinery));
+
+            // Efficiency display
+            const eff = (1 + (upgrades.laser - 1) * 0.15 + buildings.refinery * 0.08).toFixed(1);
+            document.getElementById('efficiency').innerHTML = `EFF: ${eff}x`;
+
+            // Ship progress
+            updateShipProgress();
+        }
+
+        function updateShipProgress() {
+            const reg = Math.min(resources.regolith, SHIP_REQUIREMENTS.regolith);
+            const ic = Math.min(resources.ice, SHIP_REQUIREMENTS.ice);
+            const ir = Math.min(resources.iron, SHIP_REQUIREMENTS.iron);
+            const he = Math.min(resources.helium3, SHIP_REQUIREMENTS.helium3);
+
+            document.getElementById('ship-regolith').textContent = `${Math.floor(reg)}/${SHIP_REQUIREMENTS.regolith}`;
+            document.getElementById('ship-ice').textContent = `${Math.floor(ic)}/${SHIP_REQUIREMENTS.ice}`;
+            document.getElementById('ship-iron').textContent = `${Math.floor(ir)}/${SHIP_REQUIREMENTS.iron}`;
+            document.getElementById('ship-helium').textContent = `${Math.floor(he)}/${SHIP_REQUIREMENTS.helium3}`;
+
+            const totalNeeded = SHIP_REQUIREMENTS.regolith + SHIP_REQUIREMENTS.ice + SHIP_REQUIREMENTS.iron + SHIP_REQUIREMENTS.helium3;
+            const totalHave = reg + ic + ir + he;
+            const percent = Math.floor((totalHave / totalNeeded) * 100);
+            
+            document.getElementById('ship-bar').style.width = percent + '%';
+            document.getElementById('ship-progress').textContent = `${Math.floor(totalHave)} / ${totalNeeded}`;
+
+            const launchBtn = document.getElementById('launch-btn');
+            const hint = document.getElementById('launch-hint');
+            
+            if (resources.regolith >= SHIP_REQUIREMENTS.regolith &&
+                resources.ice >= SHIP_REQUIREMENTS.ice &&
+                resources.iron >= SHIP_REQUIREMENTS.iron &&
+                resources.helium3 >= SHIP_REQUIREMENTS.helium3) {
+                launchBtn.classList.remove('hidden');
+                hint.classList.add('hidden');
+            } else {
+                launchBtn.classList.add('hidden');
+                hint.classList.remove('hidden');
+            }
+        }
+
+        function addLog(msg, color = '#f4a261') {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = `log-entry text-[${color}]`;
+            entry.textContent = `> ${msg}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+            
+            // Limit log entries
+            if (log.children.length > 8) {
+                log.removeChild(log.children[0]);
+            }
+        }
+
+        function mineAt(x, y) {
+            if (isMining) return;
+            isMining = true;
+            
+            // Find nearby rock or mine ground
+            let mined = false;
+            let resourceType = null;
+            let amount = 0;
+            
+            for (let i = 0; i < rocks.length; i++) {
+                const rock = rocks[i];
+                const dist = Math.hypot(rock.x - x, rock.y - y);
+                if (dist < rock.size + 25 && rock.health > 0) {
+                    rock.health--;
+                    
+                    // Resource based on rock type
+                    if (rock.type === 'rare') {
+                        if (Math.random() > 0.6) resourceType = 'helium3';
+                        else resourceType = 'iron';
+                    } else {
+                        const roll = Math.random();
+                        if (roll < 0.55) resourceType = 'regolith';
+                        else if (roll < 0.82) resourceType = 'ice';
+                        else resourceType = 'iron';
+                    }
+                    
+                    amount = Math.floor((2 + Math.random() * 4) * (1 + (upgrades.laser - 1) * 0.15 + buildings.refinery * 0.08));
+                    
+                    createParticles(rock.x, rock.y - 8, 12, '#c1440e');
+                    createParticles(x, y, 6, '#f4a261');
+                    
+                    if (rock.health <= 0) {
+                        // Respawn new rock
+                        rocks[i] = {
+                            x: 40 + Math.random() * 320,
+                            y: 110 + Math.random() * 130,
+                            size: 18 + Math.random() * 14,
+                            health: 3 + Math.floor(Math.random() * 3),
+                            maxHealth: 3 + Math.floor(Math.random() * 3),
+                            type: Math.random() > 0.75 ? 'rare' : 'normal'
+                        };
+                    }
+                    mined = true;
+                    break;
+                }
+            }
+            
+            if (!mined) {
+                // Ground mine
+                const roll = Math.random();
+                if (roll < 0.6) resourceType = 'regolith';
+                else if (roll < 0.85) resourceType = 'ice';
+                else if (roll < 0.96) resourceType = 'iron';
+                else resourceType = 'helium3';
+                
+                amount = Math.floor((1.5 + Math.random() * 2.5) * (1 + (upgrades.laser - 1) * 0.15 + buildings.refinery * 0.08));
+                createParticles(x, y, 8, '#8b3a0f');
+            }
+            
+            if (resourceType && amount > 0) {
+                resources[resourceType] += amount;
+                
+                const names = { regolith: 'Regolith', ice: 'Water Ice', iron: 'Iron Ore', helium3: 'Helium-3' };
+                addLog(`+${amount} ${names[resourceType]}`, '#f4a261');
+                
+                // Rare find message
+                if (resourceType === 'helium3' && Math.random() > 0.5) {
+                    addLog('RARE HELIUM-3 FOUND!', '#c1440e');
+                }
+            }
+            
+            // Energy gain
+            energy += 1;
+            
+            updateUI();
+            
+            // End mining animation
+            setTimeout(() => {
+                isMining = false;
+            }, 280);
+            
+            // Save
+            saveGame();
+        }
+
+        function buyUpgrade(type) {
+            if (type === 'laser') {
+                const cost = Math.floor(25 * Math.pow(1.6, upgrades.laser - 1));
+                if (resources.regolith >= cost) {
+                    resources.regolith -= cost;
+                    upgrades.laser++;
+                    addLog(`Mining Laser upgraded to Lv.${upgrades.laser}!`, '#f4a261');
+                    createParticles(200, 150, 15, '#f4a261');
+                } else {
+                    addLog('Not enough Regolith!', '#c1440e');
+                }
+            } else if (type === 'drone') {
+                const cost = Math.floor(40 * Math.pow(1.7, upgrades.drone));
+                if (resources.regolith >= cost) {
+                    resources.regolith -= cost;
+                    upgrades.drone++;
+                    addLog(`Mining Drone deployed! +${(upgrades.drone * 0.8).toFixed(1)}/s`, '#f4a261');
+                } else {
+                    addLog('Not enough Regolith!', '#c1440e');
+                }
+            }
+            updateUI();
+            saveGame();
+        }
+
+        function buyBuilding(type) {
+            let cost, resource = 'regolith';
+            
+            if (type === 'solar') {
+                cost = Math.floor(15 * Math.pow(1.5, buildings.solar));
+            } else if (type === 'habitat') {
+                cost = Math.floor(30 * Math.pow(1.6, buildings.habitat));
+                resource = 'ice';
+            } else if (type === 'rig') {
+                cost = Math.floor(50 * Math.pow(1.55, buildings.rig));
+            } else if (type === 'refinery') {
+                cost = Math.floor(80 * Math.pow(1.65, buildings.refinery));
+                resource = 'iron';
+            }
+            
+            if (resources[resource] >= cost) {
+                resources[resource] -= cost;
+                buildings[type]++;
+                
+                const names = { solar: 'Solar Array', habitat: 'Habitat Module', rig: 'Mining Rig', refinery: 'Refinery' };
+                addLog(`${names[type]} built! (Lv.${buildings[type]})`, '#f4a261');
+                
+                if (type === 'rig') {
+                    addLog('Passive regolith production increased!', '#f4a261');
+                }
+            } else {
+                const needed = resource === 'regolith' ? 'Regolith' : resource === 'ice' ? 'Water Ice' : 'Iron Ore';
+                addLog(`Need more ${needed}!`, '#c1440e');
+            }
+            
+            updateUI();
+            saveGame();
+        }
+
+        function attemptLaunch() {
+            if (resources.regolith >= SHIP_REQUIREMENTS.regolith &&
+                resources.ice >= SHIP_REQUIREMENTS.ice &&
+                resources.iron >= SHIP_REQUIREMENTS.iron &&
+                resources.helium3 >= SHIP_REQUIREMENTS.helium3) {
+                
+                // Win!
+                document.getElementById('win-modal').classList.remove('hidden');
+                document.getElementById('win-modal').classList.add('flex');
+                
+                // Confetti
+                for (let i = 0; i < 80; i++) {
+                    setTimeout(() => {
+                        createParticles(Math.random() * 400, Math.random() * 200, 1, 
+                            ['#f4a261', '#c1440e', '#ffffff'][Math.floor(Math.random()*3)]);
+                    }, i * 3);
+                }
+                
+                addLog('🚀 LAUNCH SUCCESSFUL! RETURNING TO EARTH!', '#f4a261');
+            }
+        }
+
+        function restartGame() {
+            // Reset everything
+            resources = { regolith: 50, ice: 20, iron: 10, helium3: 2 };
+            upgrades = { laser: 1, drone: 0 };
+            buildings = { solar: 0, habitat: 0, rig: 0, refinery: 0 };
+            energy = 0;
+            particles = [];
+            initRocks();
+            
+            document.getElementById('win-modal').classList.remove('flex');
+            document.getElementById('win-modal').classList.add('hidden');
+            
+            updateUI();
+            addLog('New mission started on Mars!', '#f4a261');
+            saveGame();
+        }
+
+        function shareWin() {
+            const text = "I just escaped Mars in Mars Miner game! Built my base and launched the ship back to Earth! 🚀 Try it: https://github.com/ashtonamirrezvani-oss/mars-miner-game";
+            if (navigator.share) {
+                navigator.share({ title: 'Mars Miner Win!', text: text });
+            } else {
+                navigator.clipboard.writeText(text).then(() => {
+                    alert('Copied to clipboard! Share your victory!');
+                });
+            }
+        }
+
+        function saveGame() {
+            const saveData = {
+                resources,
+                upgrades,
+                buildings,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('marsMinerSave', JSON.stringify(saveData));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('marsMinerSave');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    resources = data.resources || resources;
+                    upgrades = data.upgrades || upgrades;
+                    buildings = data.buildings || buildings;
+                    addLog('Progress loaded from previous mission.', '#f4a261');
+                } catch(e) {
+                    console.error('Load failed');
+                }
+            } else {
+                // Starting resources
+                resources.regolith = 45;
+                resources.ice = 12;
+                resources.iron = 8;
+                resources.helium3 = 1;
+                addLog('Welcome to Mars, Miner! Tap the surface to begin.', '#f4a261');
+            }
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        function passiveIncome() {
+            // Drone income
+            if (upgrades.drone > 0) {
+                const droneGain = upgrades.drone * 0.8;
+                resources.regolith += droneGain;
+            }
+            
+            // Rig income
+            if (buildings.rig > 0) {
+                resources.regolith += buildings.rig * 1.2;
+            }
+            
+            // Solar energy (just visual for now)
+            if (buildings.solar > 0) {
+                energy += buildings.solar * 0.6;
+            }
+            
+            // Refinery bonus is already in mining calc
+            
+            // Occasional random events
+            if (Math.random() < 0.03 && buildings.habitat > 0) {
+                resources.ice += 1;
+                addLog('Habitat recycled water!', '#f4a261');
+            }
+            
+            updateUI();
+        }
+
+        function setupCanvas() {
+            // Click / tap handler
+            canvas.addEventListener('pointerdown', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const clickX = (e.clientX - rect.left) * scaleX;
+                const clickY = (e.clientY - rect.top) * scaleY;
+                
+                mineAt(clickX, clickY);
+            });
+
+            // Touch friendly
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const touchX = (e.touches[0].clientX - rect.left) * scaleX;
+                const touchY = (e.touches[0].clientY - rect.top) * scaleY;
+                mineAt(touchX, touchY);
+            }, { passive: false });
+
+            // Initial rocks
+            initRocks();
+        }
+
+        function startPassiveLoop() {
+            setInterval(() => {
+                passiveIncome();
+                // Auto save every 30 seconds
+                if (!gameSaved) {
+                    saveGame();
+                    gameSaved = true;
+                    setTimeout(() => gameSaved = false, 30000);
+                }
+            }, 1000);
+        }
+
+        function initGame() {
+            initTailwind();
+            loadGame();
+            setupCanvas();
+            updateUI();
+            gameLoop();
+            startPassiveLoop();
+            
+            // Welcome message
+            setTimeout(() => {
+                const log = document.getElementById('log');
+                if (log.children.length < 2) {
+                    addLog('Tip: Upgrade your laser for better yields!', '#f4a261');
+                }
+            }, 4500);
+            
+            // Keyboard support (for desktop)
+            document.addEventListener('keydown', (e) => {
+                if (e.key === ' ' || e.key === 'Enter') {
+                    e.preventDefault();
+                    // Mine at center
+                    mineAt(200, 180);
+                }
+            });
+            
+            // Easter egg: click header for free regolith
+            document.querySelector('h1').addEventListener('click', () => {
+                resources.regolith += 5;
+                addLog('Bonus regolith from Martian dust storm!', '#f4a261');
+                updateUI();
+            });
+            
+            console.log('%c[Mars Miner] Game initialized successfully!', 'color:#f4a261');
+        }
+
+        // Boot the game
+        window.onload = initGame;
+    </script>
+</body>
+</html>
